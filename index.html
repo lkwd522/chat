@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HTTP Chat</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h1>HTTP Chat</h1>
+  <div id="messages"></div>
+  <form id="nickname-form" action="">
+    <input id="nickname-input" autocomplete="off" placeholder="Введите никнейм" />
+    <button>Присоединиться</button>
+  </form>
+  <form id="message-form" action="">
+    <input id="message-input" autocomplete="off" placeholder="Введите сообщение" />
+    <button>Отправить</button>
+  </form>
+
+  <script>
+    // Подключение к серверу
+    const socket = io();
+
+    // Обработчик отправки никнейма
+    $('#nickname-form').submit(e => {
+      e.preventDefault();
+      const nickname = $('#nickname-input').val();
+      socket.emit('set nickname', nickname);
+      $('#nickname-input').val('');
+      $('#nickname-form').hide();
+      $('#message-form').show();
+      return false;
+    });
+
+    // Обработчик отправки сообщения
+    $('#message-form').submit(e => {
+      e.preventDefault();
+      const message = $('#message-input').val();
+      socket.emit('chat message', message);
+      $('#message-input').val('');
+      return false;
+    });
+
+    // Обработчик получения сообщения
+    socket.on('chat message', message => {
+      $('#messages').append($('<li>').text(message));
+    });
+
+    // Обработчик входа пользователя
+    socket.on('user joined', message => {
+      $('#messages').append($('<li>').text(message));
+    });
+
+    // Обработчик отключения пользователя
+    socket.on('user left', message => {
+      $('#messages').append($('<li>').text(message));
+    });
+  </script>
+</body>
+</html>
+
